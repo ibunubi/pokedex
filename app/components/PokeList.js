@@ -49,12 +49,14 @@ class PokeList extends Component {
         }
     }
     openDetail(val){
+        document.body.className = 'overlay';
         this.setState({
             selectedPoke: val,
             pokeDisplaying: true
         });
     }
     closeDetail(){
+        document.body.classList.remove("overlay");
         this.setState({
             pokeDisplaying: false
         });

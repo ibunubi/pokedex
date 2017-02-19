@@ -3,11 +3,14 @@ body{
     padding: 0px;
     font-family: "Courier New", "Arial", "Verdana";
 }
+body.overlay{
+    overflow: hidden;
+}
 #mount-point{
     position: relative;
 }
 .dialog{
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
     right: 0px;
@@ -16,7 +19,7 @@ body{
     display: none;
 }
 .dialog a{
-    position: absolute;
+    position: fixed;
     right: 0px;
     color: white;
     padding: 20px;
