@@ -3,18 +3,17 @@ import axios from 'axios'
 
 import {BASE_URI} from '../config'
 
-class Filter extends Component {
+class PokeFilter extends Component {
     constructor(props) {
         super(props);
         this.state = {
             items: []
         };
-        this.onChange = this.onChange.bind(this);
-        this.loadGeneration = this.loadGeneration.bind(this);
+        this.loadData = this.loadData.bind(this);
     }
-    loadGeneration(){
+    loadData(){
         let me = this;
-        axios.get(BASE_URI + 'generation/')
+        axios.get(BASE_URI + 'type/') // want different type of filter, change this url. but don't forget to modify pokeLoad@PokeList.js
         .then(function (response) {
             me.setState({
                 items: response.data.results
@@ -25,23 +24,20 @@ class Filter extends Component {
         });
     }
     componentDidMount(){
-        this.loadGeneration();
-    }
-    onChange(e){
-        var id = this.refs.filterOpt.value.toLowerCase();
-        console.log(id);
+        this.loadData();
     }
     render () {
-        let optionList = <option>Generation data not loaded</option>
+        let optionList = <option>Filter data not loaded</option>
         if(this.state.items) {
             optionList = this.state.items.map((item) => {
                 return <option key={item.url} value={item.url}>{item.name}</option>
             })
         }
         return (
-            <div>
-                <label htmlFor='filterOpt'>Generation : </label>
-                <select ref='filterOpt' name='filterOpt' onChange={this.onChange}>
+            <div className='filter'>
+                <label htmlFor='filterOpt'>Poke filter by type : </label>
+                <select ref='filterOpt' name='filterOpt' onChange={this.props.onFilterChange}>
+                    <option value={BASE_URI + 'pokemon/'} key={BASE_URI + 'pokemon/'}>All Pokemon</option>
                     {optionList}
                 </select>
             </div>
@@ -49,4 +45,4 @@ class Filter extends Component {
     }
 }
 
-export default Filter
+export default PokeFilter

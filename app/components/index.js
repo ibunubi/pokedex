@@ -1,5 +1,5 @@
-import Filter from './Filter'
+import PokeFilter from './PokeFilter'
 import PokeList from './PokeList'
 import PokeDetail from './PokeDetail'
 
-export {Filter, PokeList, PokeDetail}
+export {PokeFilter, PokeList, PokeDetail}
