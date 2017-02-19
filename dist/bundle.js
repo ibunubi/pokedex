@@ -24784,10 +24784,12 @@
 
 	        _this.state = {
 	            poke: [],
+	            mainUrl: _config.BASE_URI + 'pokemon/',
 	            nextUrl: _config.BASE_URI + 'pokemon/',
 	            loading: false,
 	            pokeDisplaying: false,
-	            selectedPoke: []
+	            selectedPoke: [],
+	            isFiltering: false
 	        };
 
 	        _this.loadPoke = _this.loadPoke.bind(_this);
@@ -24800,6 +24802,8 @@
 	        value: function loadPoke() {
 	            var me = this,
 	                loadedPoke = me.state.poke;
+
+	            this.setState({ loading: true });
 
 	            _axios2.default.get(me.state.nextUrl).then(function (response) {
 	                var newPoke = loadedPoke.concat(response.data.results);
@@ -24826,7 +24830,6 @@
 	            heightLimit = heightDoc - heihghtViewPort; // if this height is passed by loadAt, then it will call loadPoke function
 
 	            if (loadAt > heightLimit && this.state.loading === false) {
-	                this.setState({ loading: true });
 	                this.loadPoke();
 	            }
 	        }
@@ -24852,7 +24855,11 @@
 	        value: function onFilterChange(_ref) {
 	            var target = _ref.target;
 
-	            console.log(target.value);
+	            this.setState({
+	                isFiltering: this.state.mainUrl == target.value,
+	                nextUrl: target.value
+	            });
+	            this.loadPoke();
 	        }
 	    }, {
 	        key: 'componentDidMount',

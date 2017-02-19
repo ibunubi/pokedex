@@ -1,16 +1,18 @@
 var path = require('path');
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
   entry: path.resolve('./app'),
   output: {
-    path: __dirname,
+    path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js'
   },
   module: {
     loaders: [
-      {
-        test: /\.css$/,
-        loader: 'style!css'
+      { 
+        test: /\.css$/, 
+        loader: ExtractTextPlugin.extract("style-loader", "css-loader") 
       },
       {
         test: /\.(js|jsx)$/,
@@ -23,10 +25,12 @@ module.exports = {
       }
     ]
   },
+  plugins: [
+      new ExtractTextPlugin("style.min.css"),
+      new OptimizeCssAssetsPlugin()
+  ],
   devServer: {
     port: 8080,
-    hot: true,
-    // inline: true,
-    // contentBase: '/'
+    contentBase: './dist'
   }
 }
