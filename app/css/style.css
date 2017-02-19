@@ -1,0 +1,50 @@
+body{
+    margin: 0px;
+    padding: 0px;
+    font-family: "Courier New", "Arial", "Verdana";
+}
+#mount-point{
+    position: relative;
+}
+.dialog{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: rgba(0,0,0,.7);
+    display: none;
+}
+.dialog a{
+    position: absolute;
+    right: 0px;
+    color: white;
+    padding: 5px;
+    display: inline-block;
+}
+.dialog.active{
+    display: block;
+}
+.dialog .wrapper{
+    margin: 40px 20px;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.poke-list{
+    margin: 0px;
+    padding: 0px;
+}
+.poke-list li{
+    padding: 30px 20px 40px;
+    border-bottom: solid 1px #f8f8f8;
+    letter-spacing: 2px;
+    font-size: 3em;
+}
+.poke-list li:last-child{
+    border-bottom: none;
+}
+.poke-list li:hover{
+    border-left: solid 3px orangered;
+    cursor: pointer;
+}
