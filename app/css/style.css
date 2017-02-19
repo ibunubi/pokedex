@@ -17,9 +17,10 @@ body.overlay{
     bottom: 0px;
     background-color: rgba(0,0,0,.7);
     display: none;
+    overflow-y: auto;
 }
 .dialog a{
-    position: fixed;
+    position: absolute;
     right: 0px;
     color: white;
     padding: 20px;
@@ -54,7 +55,7 @@ h1, h2, h3{
     border-radius: 5px;
     border: solid 1px #f8f8f8;
     height: 175px;
-    width: 200px;
+    width: 175px;
     text-align: center;
 }
 .img-sprite img{
