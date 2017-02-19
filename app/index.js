@@ -10,7 +10,7 @@ class App extends Component {
     render () {
         return (
             <div>
-                <header>Pokedex</header>
+                <header><h1>Pokedex</h1></header>
                 <Filter />
                 <PokeList />
             </div>

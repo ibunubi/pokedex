@@ -28,7 +28,7 @@ class PokeList extends Component {
             me.setState({
                 poke: newPoke,
                 nextUrl: response.data.next,
-                loading: true
+                loading: false
             })
         })
         .catch(function (error) {
@@ -80,13 +80,16 @@ class PokeList extends Component {
                     <PokeDetail selectedPoke={this.state.selectedPoke} />
                 </div>;
         }
+        let noteOnLoad = '';
+        if(this.state.loading === true)
+            noteOnLoad = <p className='loading'>Loading ... </p>
         return (
             <div>
                 {showDetail}
                 <ul className="poke-list">
                     {item}
                 </ul>
-
+                {noteOnLoad}
             </div>
         )
     }

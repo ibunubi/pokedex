@@ -31,32 +31,40 @@ class PokeDetail extends Component {
     render () {
         let itemDetail = <p>Loading pokemon data...</p>
         if(this.state.isLoading === false){
+            let spritesList = this.state.data.sprites,
+                imgSprites = Object.keys(spritesList).map(function (key) {
+                    if(spritesList[key] !== null) {
+                        let img = <img src={spritesList[key]} className='img-circle img-responsive' alt={key}/>;
+                        return <span className='img-sprite' key={key}>{key}<br/>{img}</span>;
+                    }
+                });
+
             itemDetail = <div className='container'>
                 <div className='row'>
                     <div className='col-md-6 col-sm-12'>
-                        <div className='col-sm-6 col-xs-12'>Name</div>
+                        <div className='col-sm-6 col-xs-12'><label>Name</label></div>
                         <div className='col-sm-6 col-xs-12'>{this.state.data.name}</div>
                     </div>
                     <div className='col-md-6 col-sm-12'>
-                        <div className='col-sm-6 col-xs-12'>Base Experience</div>
+                        <div className='col-sm-6 col-xs-12'><label>Base Experience</label></div>
                         <div className='col-sm-6 col-xs-12'>{this.state.data.base_experience}</div>
                     </div>
                 </div>
                 <div className='row'>
                     <div className='col-md-6 col-sm-12'>
-                        <div className='col-sm-6 col-xs-12'>Height</div>
+                        <div className='col-sm-6 col-xs-12'><label>Height</label></div>
                         <div className='col-sm-6 col-xs-12'>{this.state.data.height}</div>
                     </div>
                     <div className='col-md-6 col-sm-12'>
-                        <div className='col-sm-6 col-xs-12'>Weight</div>
+                        <div className='col-sm-6 col-xs-12'><label>Weight</label></div>
                         <div className='col-sm-6 col-xs-12'>{this.state.data.weight}</div>
                     </div>
                 </div>
                 <div className='row'>
                     <div className='col-md-12 col-sm-12'>
-                        <div className='col-sm-3 col-xs-12'>Image</div>
-                        <div className='col-sm-9 col-xs-12'>
-                            <image src={this.state.data.back_default}/>
+                        <div className='col-md-12'><label>Photos</label></div>
+                        <div className='col-md-12'>
+                            {imgSprites}
                         </div>
                     </div>
                 </div>
@@ -64,7 +72,7 @@ class PokeDetail extends Component {
         }
         return (
             <div className='wrapper'>
-                <h1>Poke Detail : {this.props.selectedPoke.name}</h1>
+                <h2>Poke Detail : {this.props.selectedPoke.name}</h2>
                 {itemDetail}
             </div>
         )
