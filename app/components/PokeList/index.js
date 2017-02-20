@@ -18,7 +18,8 @@ class PokeList extends Component {
             loading: false,
             pokeDisplaying: false ,
             selectedPoke: [],
-            doFilter: false
+            doFilter: false,
+            errorMsg: '',
         };
 
         this.loadPoke = this.loadPoke.bind(this);
@@ -32,7 +33,7 @@ class PokeList extends Component {
         if(!this.state.nextUrl) return false;
 
         // everytime we start request, it will give status loading
-        this.setState({loading: true});
+        this.setState({loading: true, errorMsg: ''});
 
         axios.get(me.state.nextUrl)
         .then(function (response) {
@@ -55,6 +56,9 @@ class PokeList extends Component {
         })
         .catch(function (error) {
             console.log('error :', error);
+            me.setState({
+                errorMsg: 'Failed on request data'
+            });
         });
     }
     handleScroll(event) {
@@ -115,7 +119,7 @@ class PokeList extends Component {
                     closeDetail={this.closeDetail.bind(this)} 
                     selectedPoke={this.state.selectedPoke}/>
                 <Items pokeItems={this.state.poke} detail={this.openDetail.bind(this)}/>
-                <Loader showLoader={this.state.loading}/>
+                <Loader showLoader={this.state.loading} errorMsg={this.state.errorMsg}/>
             </div>
         )
     }
