@@ -16,3 +16,4 @@ After you clone this repo, please do following command in your CLI on your path
 
 > - ```npm install```
 > - ```npm run test```
+> - open ```http://localhost:8080/``` on your browser (if you want to custom port, please edit on ```webpack.config.js```)
