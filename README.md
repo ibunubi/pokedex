@@ -11,7 +11,10 @@ Manual
 -------------
 
 **Demo:**
-[Pokedex: Simple List and Detail](http://pokedex.aliimron.web.id/)
+
+Make sure you have internet connection
+- On the Web : [Pokedex: Simple List and Detail](http://pokedex.aliimron.web.id/)
+- On local : open ```./dist/index.html``` into your browser
 
 ### Dev ###
 After you clone this repo, please do following command in your CLI on your path
