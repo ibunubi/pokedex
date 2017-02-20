@@ -74,9 +74,9 @@
 
 	var _components = __webpack_require__(264);
 
-	__webpack_require__(297);
+	__webpack_require__(303);
 
-	__webpack_require__(301);
+	__webpack_require__(307);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23095,7 +23095,7 @@
 
 	var _PokeList2 = _interopRequireDefault(_PokeList);
 
-	var _PokeDetail = __webpack_require__(293);
+	var _PokeDetail = __webpack_require__(296);
 
 	var _PokeDetail2 = _interopRequireDefault(_PokeDetail);
 
@@ -23166,7 +23166,8 @@
 	        key: 'loadData',
 	        value: function loadData() {
 	            var me = this;
-	            _axios2.default.get(_config.BASE_URI + 'type/').then(function (response) {
+	            _axios2.default.get(_config.BASE_URI + 'type/') // want different type of filter, change this url. but don't forget to modify pokeLoad@PokeList.js
+	            .then(function (response) {
 	                me.setState({
 	                    items: response.data.results
 	                });
@@ -23206,7 +23207,7 @@
 	                ),
 	                _react2.default.createElement(
 	                    'select',
-	                    { ref: 'filterOpt', name: 'filterOpt', onChange: this.props.onFilterChange.bind(this) },
+	                    { ref: 'filterOpt', name: 'filterOpt', onChange: this.props.onFilterChange },
 	                    _react2.default.createElement(
 	                        'option',
 	                        { value: _config.BASE_URI + 'pokemon/', key: _config.BASE_URI + 'pokemon/' },
@@ -24762,15 +24763,23 @@
 
 	var _axios2 = _interopRequireDefault(_axios);
 
-	var _PokeDetail = __webpack_require__(293);
-
-	var _PokeDetail2 = _interopRequireDefault(_PokeDetail);
+	var _config = __webpack_require__(291);
 
 	var _PokeFilter = __webpack_require__(265);
 
 	var _PokeFilter2 = _interopRequireDefault(_PokeFilter);
 
-	var _config = __webpack_require__(291);
+	var _Items = __webpack_require__(293);
+
+	var _Items2 = _interopRequireDefault(_Items);
+
+	var _Loader = __webpack_require__(294);
+
+	var _Loader2 = _interopRequireDefault(_Loader);
+
+	var _Modal = __webpack_require__(295);
+
+	var _Modal2 = _interopRequireDefault(_Modal);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -24784,36 +24793,54 @@
 
 	        _this.state = {
 	            poke: [],
-	            mainUrl: _config.BASE_URI + 'pokemon/',
+	            defaultUrl: _config.BASE_URI + 'pokemon/',
 	            nextUrl: _config.BASE_URI + 'pokemon/',
 	            loading: false,
 	            pokeDisplaying: false,
 	            selectedPoke: [],
-	            isFiltering: false
+	            doFilter: false,
+	            errorMsg: ''
 	        };
 
 	        _this.loadPoke = _this.loadPoke.bind(_this);
 	        _this.handleScroll = _this.handleScroll.bind(_this);
+	        _this.onFilterChange = _this.onFilterChange.bind(_this);
 	        return _this;
 	    }
 
 	    (0, _createClass3.default)(PokeList, [{
 	        key: 'loadPoke',
 	        value: function loadPoke() {
-	            var me = this,
-	                loadedPoke = me.state.poke;
+	            var me = this;
 
-	            this.setState({ loading: true });
+	            // if there is no more data to load, it will stop here
+	            if (!this.state.nextUrl) return false;
+
+	            // everytime we start request, it will give status loading
+	            this.setState({ loading: true, errorMsg: '' });
 
 	            _axios2.default.get(me.state.nextUrl).then(function (response) {
-	                var newPoke = loadedPoke.concat(response.data.results);
+	                var newPoke = [];
+	                if (me.state.doFilter) {
+	                    // filter results give different object, so we need to map it manually
+	                    response.data.pokemon.map(function (val) {
+	                        newPoke.push(val.pokemon);
+	                    });
+	                } else {
+	                    // carrying the old data for infinite scroll
+	                    var loadedPoke = me.state.poke;
+	                    newPoke = loadedPoke.concat(response.data.results);
+	                }
 	                me.setState({
 	                    poke: newPoke,
-	                    nextUrl: response.data.next,
-	                    loading: false
+	                    nextUrl: response.data.next, // set next url to next infinite request
+	                    loading: false // hide status loading
 	                });
 	            }).catch(function (error) {
 	                console.log('error :', error);
+	                me.setState({
+	                    errorMsg: 'Failed on request data'
+	                });
 	            });
 	        }
 	    }, {
@@ -24836,30 +24863,42 @@
 	    }, {
 	        key: 'openDetail',
 	        value: function openDetail(val) {
+	            // start - open dialog handler
 	            document.body.className = 'overlay';
 	            this.setState({
 	                selectedPoke: val,
 	                pokeDisplaying: true
 	            });
+	            // end
 	        }
 	    }, {
 	        key: 'closeDetail',
 	        value: function closeDetail() {
+	            // start - close dialog handler
 	            document.body.classList.remove("overlay");
 	            this.setState({
 	                pokeDisplaying: false
 	            });
+	            //end
 	        }
 	    }, {
 	        key: 'onFilterChange',
 	        value: function onFilterChange(_ref) {
+	            var _this2 = this;
+
 	            var target = _ref.target;
 
+	            var loadedPoke = this.state.poke;
+	            // poke state reset if the target url is eq. with default
+	            if (target.value == this.state.defaultUrl) loadedPoke = [];
+
 	            this.setState({
-	                isFiltering: this.state.mainUrl == target.value,
-	                nextUrl: target.value
+	                nextUrl: target.value,
+	                doFilter: target.value != this.state.defaultUrl, // if target url not eq. with default, it will give filter 
+	                poke: loadedPoke
+	            }, function () {
+	                _this2.loadPoke();
 	            });
-	            this.loadPoke();
 	        }
 	    }, {
 	        key: 'componentDidMount',
@@ -24875,56 +24914,15 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var _this2 = this;
-
-	            // create poke-list
-	            var item = _react2.default.createElement(
-	                'li',
-	                null,
-	                'Pokemon data not loaded'
-	            );
-	            if (this.state.poke) {
-	                item = this.state.poke.map(function (item) {
-	                    return _react2.default.createElement(
-	                        'li',
-	                        { key: item.url, value: item.url, onClick: _this2.openDetail.bind(_this2, item) },
-	                        item.name
-	                    );
-	                });
-	            }
-	            // when poke-list clicked, and open poke-detail
-	            var showDetail = '';
-	            if (this.state.pokeDisplaying) {
-	                showDetail = _react2.default.createElement(
-	                    'div',
-	                    { className: 'dialog active' },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { href: '#', onClick: this.closeDetail.bind(this) },
-	                        'Close'
-	                    ),
-	                    _react2.default.createElement(_PokeDetail2.default, { selectedPoke: this.state.selectedPoke })
-	                );
-	            }
-	            // when poke-list is loading
-	            var noteOnLoad = '';
-	            if (this.state.loading === true) noteOnLoad = _react2.default.createElement(
-	                'p',
-	                { className: 'loading' },
-	                'Loading ... '
-	            );
-
 	            return _react2.default.createElement(
 	                'div',
 	                null,
 	                _react2.default.createElement(_PokeFilter2.default, { onFilterChange: this.onFilterChange.bind(this) }),
-	                showDetail,
-	                _react2.default.createElement(
-	                    'ul',
-	                    { className: 'poke-list' },
-	                    item
-	                ),
-	                noteOnLoad
+	                _react2.default.createElement(_Modal2.default, { pokeDisplaying: this.state.pokeDisplaying,
+	                    closeDetail: this.closeDetail.bind(this),
+	                    selectedPoke: this.state.selectedPoke }),
+	                _react2.default.createElement(_Items2.default, { pokeItems: this.state.poke, detail: this.openDetail.bind(this) }),
+	                _react2.default.createElement(_Loader2.default, { showLoader: this.state.loading, errorMsg: this.state.errorMsg })
 	            );
 	        }
 	    }]);
@@ -24937,15 +24935,147 @@
 /* 293 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// create poke-list
+	var Items = function Items(_ref) {
+	    var pokeItems = _ref.pokeItems,
+	        detail = _ref.detail;
+
+	    var item = _react2.default.createElement(
+	        "li",
+	        null,
+	        "Pokemon data not loaded"
+	    );
+	    if (pokeItems) {
+	        item = pokeItems.map(function (item) {
+	            return _react2.default.createElement(
+	                "li",
+	                { key: item.url, value: item.url, onClick: detail.bind(undefined, item) },
+	                item.name
+	            );
+	        });
+	    }
+	    return _react2.default.createElement(
+	        "ul",
+	        { className: "poke-list" },
+	        item
+	    );
+	};
+
+	exports.default = Items;
+
+/***/ },
+/* 294 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
-	var _keys = __webpack_require__(294);
+	var _react = __webpack_require__(87);
 
-	var _keys2 = _interopRequireDefault(_keys);
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// when poke-list is loading it will give status loading
+	var Loader = function Loader(_ref) {
+	    var showLoader = _ref.showLoader,
+	        errorMsg = _ref.errorMsg;
+
+	    var noteOnLoad = _react2.default.createElement('p', null);
+	    if (errorMsg == '') {
+	        if (showLoader === true) noteOnLoad = _react2.default.createElement(
+	            'p',
+	            { className: 'loading' },
+	            'Loading ... '
+	        );
+	    } else {
+	        noteOnLoad = _react2.default.createElement(
+	            'p',
+	            { className: 'loading' },
+	            errorMsg
+	        );
+	    }
+	    return _react2.default.createElement(
+	        'div',
+	        null,
+	        noteOnLoad
+	    );
+	};
+
+	exports.default = Loader;
+
+/***/ },
+/* 295 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _PokeDetail = __webpack_require__(296);
+
+	var _PokeDetail2 = _interopRequireDefault(_PokeDetail);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// when poke-list clicked, and open poke-detail
+	var Modal = function Modal(_ref) {
+	    var pokeDisplaying = _ref.pokeDisplaying,
+	        closeDetail = _ref.closeDetail,
+	        selectedPoke = _ref.selectedPoke;
+
+	    var showDetail = '';
+	    if (pokeDisplaying) {
+	        showDetail = _react2.default.createElement(
+	            'div',
+	            { className: 'dialog active' },
+	            _react2.default.createElement(
+	                'a',
+	                { href: '#', onClick: closeDetail.bind(undefined) },
+	                'Close'
+	            ),
+	            _react2.default.createElement(_PokeDetail2.default, { selectedPoke: selectedPoke })
+	        );
+	    }
+	    return _react2.default.createElement(
+	        'div',
+	        null,
+	        showDetail
+	    );
+	};
+
+	exports.default = Modal;
+
+/***/ },
+/* 296 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 
 	var _getPrototypeOf = __webpack_require__(1);
 
@@ -24974,6 +25104,10 @@
 	var _axios = __webpack_require__(266);
 
 	var _axios2 = _interopRequireDefault(_axios);
+
+	var _Info = __webpack_require__(297);
+
+	var _Info2 = _interopRequireDefault(_Info);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -25015,132 +25149,14 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            // status loading
 	            var itemDetail = _react2.default.createElement(
 	                'p',
 	                null,
 	                'Loading pokemon data...'
 	            );
 	            if (this.state.isLoading === false) {
-	                var spritesList = this.state.data.sprites,
-	                    imgSprites = (0, _keys2.default)(spritesList).map(function (key) {
-	                    if (spritesList[key] !== null) {
-	                        var img = _react2.default.createElement('img', { src: spritesList[key], className: 'img-circle img-responsive', alt: key });
-	                        return _react2.default.createElement(
-	                            'span',
-	                            { className: 'img-sprite', key: key },
-	                            key,
-	                            _react2.default.createElement('br', null),
-	                            img
-	                        );
-	                    }
-	                });
-
-	                itemDetail = _react2.default.createElement(
-	                    'div',
-	                    { className: 'container' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'row' },
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'col-md-6 col-sm-12' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                _react2.default.createElement(
-	                                    'label',
-	                                    null,
-	                                    'Name'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                this.state.data.name
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'col-md-6 col-sm-12' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                _react2.default.createElement(
-	                                    'label',
-	                                    null,
-	                                    'Base Experience'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                this.state.data.base_experience
-	                            )
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'row' },
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'col-md-6 col-sm-12' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                _react2.default.createElement(
-	                                    'label',
-	                                    null,
-	                                    'Height'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                this.state.data.height
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'col-md-6 col-sm-12' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                _react2.default.createElement(
-	                                    'label',
-	                                    null,
-	                                    'Weight'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-sm-6 col-xs-12' },
-	                                this.state.data.weight
-	                            )
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'row' },
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'col-md-12 col-sm-12' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-md-12' },
-	                                _react2.default.createElement(
-	                                    'label',
-	                                    null,
-	                                    'Photos'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'col-md-12' },
-	                                imgSprites
-	                            )
-	                        )
-	                    )
-	                );
+	                itemDetail = _react2.default.createElement(_Info2.default, { data: this.state.data });
 	            }
 	            return _react2.default.createElement(
 	                'div',
@@ -25148,7 +25164,7 @@
 	                _react2.default.createElement(
 	                    'h2',
 	                    null,
-	                    'Poke Detail : ',
+	                    'Pokemon Detail : ',
 	                    this.props.selectedPoke.name
 	                ),
 	                itemDetail
@@ -25161,20 +25177,223 @@
 	exports.default = PokeDetail;
 
 /***/ },
-/* 294 */
+/* 297 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(295), __esModule: true };
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Sprites = __webpack_require__(298);
+
+	var _Sprites2 = _interopRequireDefault(_Sprites);
+
+	var _Type = __webpack_require__(302);
+
+	var _Type2 = _interopRequireDefault(_Type);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Info = function Info(_ref) {
+	    var data = _ref.data;
+
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'container' },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'row' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'col-md-6 col-sm-12' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        'Name : '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    data.name
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'col-md-6 col-sm-12' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        'Base Experience : '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    data.base_experience
+	                )
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'row' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'col-md-6 col-sm-12' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        'Height : '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    data.height
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'col-md-6 col-sm-12' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        'Weight : '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    data.weight
+	                )
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'row' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'col-md-6 col-sm-12' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        'Types : '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-6 col-xs-12' },
+	                    _react2.default.createElement(_Type2.default, { pokeTypes: data.types })
+	                )
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'row' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'col-md-12 col-sm-12' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-md-12' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        'Photos : '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-md-12' },
+	                    _react2.default.createElement(_Sprites2.default, { spritesList: data.sprites })
+	                )
+	            )
+	        )
+	    );
+	};
+
+	exports.default = Info;
 
 /***/ },
-/* 295 */
+/* 298 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(296);
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _keys = __webpack_require__(299);
+
+	var _keys2 = _interopRequireDefault(_keys);
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// generate image dom for spite images
+	var Sprites = function Sprites(_ref) {
+		var spritesList = _ref.spritesList;
+
+		return _react2.default.createElement(
+			'div',
+			null,
+			(0, _keys2.default)(spritesList).map(function (key) {
+				if (spritesList[key] !== null) {
+					var img = _react2.default.createElement('img', { src: spritesList[key], className: 'img-circle img-responsive', alt: key });
+					return _react2.default.createElement(
+						'span',
+						{ className: 'img-sprite', key: key },
+						key,
+						_react2.default.createElement('br', null),
+						img
+					);
+				}
+			})
+		);
+	};
+
+	exports.default = Sprites;
+
+/***/ },
+/* 299 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(300), __esModule: true };
+
+/***/ },
+/* 300 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(301);
 	module.exports = __webpack_require__(14).Object.keys;
 
 /***/ },
-/* 296 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 19.1.2.14 Object.keys(O)
@@ -25188,16 +25407,51 @@
 	});
 
 /***/ },
-/* 297 */
+/* 302 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// populate pokemon types
+	var Type = function Type(_ref) {
+	    var pokeTypes = _ref.pokeTypes;
+
+	    return _react2.default.createElement(
+	        'ul',
+	        { className: 'poke-types' },
+	        pokeTypes.map(function (o) {
+	            return _react2.default.createElement(
+	                'li',
+	                { key: o.type.url },
+	                o.type.name
+	            );
+	        })
+	    );
+	};
+
+	exports.default = Type;
+
+/***/ },
+/* 303 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
 
 /***/ },
-/* 298 */,
-/* 299 */,
-/* 300 */,
-/* 301 */
+/* 304 */,
+/* 305 */,
+/* 306 */,
+/* 307 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

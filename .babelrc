@@ -1,0 +1,3 @@
+{
+    "presets": ["es2015"] // add this configuration to suit es2015 in unit test
+}
