@@ -38,7 +38,7 @@ class PokeDetail extends Component {
         }
         return (
             <div className='wrapper'>
-                <h2>Poke Detail : {this.props.selectedPoke.name}</h2>
+                <h2>Pokemon Detail : {this.props.selectedPoke.name}</h2>
                 {itemDetail}
             </div>
         )
